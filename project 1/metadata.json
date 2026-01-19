@@ -1,0 +1,7 @@
+{
+  "name": "Emotion-Aware Music Recommender",
+  "description": "A React web application that detects user emotions via webcam using the Gemini API and recommends music through a simulated Spotify integration. It features real-time emotion display, a customizable music mapping engine, and an emotion history chart.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
