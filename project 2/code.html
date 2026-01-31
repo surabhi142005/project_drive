@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Churn Prediction Analytics Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ea2a33",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#050505",
+                        "surface-dark": "#1a1a1a",
+                        "border-dark": "#333333",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .sidebar-item-active {
+            background-color: rgba(234, 42, 51, 0.15);
+            border-left: 3px solid #ea2a33;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-64 flex-shrink-0 bg-white dark:bg-surface-dark border-r border-slate-200 dark:border-border-dark flex flex-col">
+<div class="p-6 flex items-center gap-3">
+<div class="bg-primary rounded-lg p-1.5 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-2xl">analytics</span>
+</div>
+<div>
+<h1 class="text-lg font-bold tracking-tight text-slate-900 dark:text-white">RetainStream</h1>
+<p class="text-[10px] uppercase tracking-widest text-primary font-bold">XGBoost v2.4.1</p>
+</div>
+</div>
+<nav class="flex-1 px-3 py-4 space-y-1">
+<a class="sidebar-item-active flex items-center gap-3 px-3 py-2.5 rounded-lg text-primary" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-semibold">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="text-sm font-medium">Churn Reports</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="text-sm font-medium">Model Performance</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-sm font-medium">Customer Segments</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-border-dark">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+<div class="mt-4 flex items-center gap-3 px-3 py-2">
+<div class="size-8 rounded-full bg-slate-200 dark:bg-slate-800 bg-cover bg-center" data-alt="User profile avatar of data scientist" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAKyGaIX1pZlmVuw7Jy8RLWuh0eTJ970wHDv7xfONuE2YS7MQG1-pytV3BOZYHnHrjAkqFSU8O8zr6qwKnKUFBzfv1U2DBibn1tnFspz1krDIIjaXwZNoQFy2CUSTUjV7_Q1JbApouGU_f7860mIZLtplCw41_pnoQTTcJEUIbz63kkPg9tNiRR3NYn6BvCMVoMjQmqLuFkjyNV4yHTFD3Ue7pnKSdssq27kG9NtiJTxh70FuihyarnCeCdhSfyIjV8WOas1wqWycJU")'></div>
+<div class="flex flex-col">
+<span class="text-xs font-semibold">Alex Chen</span>
+<span class="text-[10px] text-slate-500">Lead Analyst</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto scrollbar-hide">
+<header class="sticky top-0 z-10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-8 py-6 flex justify-between items-center">
+<div>
+<h2 class="text-2xl font-bold dark:text-white">Churn Prediction Analytics</h2>
+<p class="text-sm text-slate-500">Real-time subscription health and model insights</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 bg-slate-100 dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-lg px-3 py-2">
+<span class="material-symbols-outlined text-slate-400 text-sm">calendar_today</span>
+<span class="text-xs font-medium">Last 30 Days</span>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-white text-sm font-bold px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg shadow-primary/20 transition-all">
+<span class="material-symbols-outlined text-sm">refresh</span>
+                        Run Prediction
+                    </button>
+</div>
+</header>
+<div class="px-8 pb-12 space-y-8">
+<!-- KPI Section -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark shadow-sm">
+<div class="flex justify-between items-start">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Current Churn Rate</p>
+<span class="bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-[10px] font-bold px-2 py-0.5 rounded-full">+0.4%</span>
+</div>
+<p class="text-slate-900 dark:text-white tracking-tight text-3xl font-extrabold">4.2%</p>
+<p class="text-slate-400 text-xs mt-1">vs 3.8% previous month</p>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark shadow-sm">
+<div class="flex justify-between items-start">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Predicted Churners (30d)</p>
+<span class="bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full">-120</span>
+</div>
+<p class="text-slate-900 dark:text-white tracking-tight text-3xl font-extrabold">1,240</p>
+<p class="text-slate-400 text-xs mt-1">Confidence Interval: 94%</p>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark shadow-sm">
+<div class="flex justify-between items-start">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Model AUC Score</p>
+<span class="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full">Stable</span>
+</div>
+<p class="text-slate-900 dark:text-white tracking-tight text-3xl font-extrabold">0.87</p>
+<p class="text-slate-400 text-xs mt-1">XGBoost Optimized v2.4.1</p>
+</div>
+</section>
+<!-- Charts Section -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<!-- Distribution Chart -->
+<div class="flex flex-col gap-6 rounded-xl border border-slate-200 dark:border-border-dark bg-white dark:bg-surface-dark p-6 shadow-sm">
+<div>
+<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight">Churn Probability Distribution</h3>
+<p class="text-slate-500 text-xs font-normal">Histogram of predicted risk scores across active user base</p>
+</div>
+<div class="grid h-64 grid-flow-col gap-3 grid-rows-[1fr_auto] items-end justify-items-stretch">
+<!-- Bars -->
+<div class="relative group h-full flex items-end">
+<div class="bg-slate-100 dark:bg-slate-800/50 w-full rounded-t-sm h-[20%] group-hover:bg-primary/20 transition-all"></div>
+</div>
+<div class="relative group h-full flex items-end">
+<div class="bg-slate-100 dark:bg-slate-800/50 w-full rounded-t-sm h-[35%] group-hover:bg-primary/20 transition-all"></div>
+</div>
+<div class="relative group h-full flex items-end">
+<div class="bg-slate-100 dark:bg-slate-800/50 w-full rounded-t-sm h-[45%] group-hover:bg-primary/20 transition-all"></div>
+</div>
+<div class="relative group h-full flex items-end">
+<div class="bg-slate-100 dark:bg-slate-800/50 w-full rounded-t-sm h-[30%] group-hover:bg-primary/20 transition-all"></div>
+</div>
+<div class="relative group h-full flex items-end">
+<div class="bg-slate-200 dark:bg-slate-700/50 w-full rounded-t-sm h-[25%] group-hover:bg-primary/30 transition-all"></div>
+</div>
+<div class="relative group h-full flex items-end">
+<div class="bg-primary/40 w-full rounded-t-sm h-[15%] group-hover:bg-primary/60 transition-all"></div>
+</div>
+<div class="relative group h-full flex items-end">
+<div class="bg-primary/60 w-full rounded-t-sm h-[12%] group-hover:bg-primary/80 transition-all"></div>
+</div>
+<div class="relative group h-full flex items-end">
+<div class="bg-primary w-full rounded-t-sm h-[18%] transition-all"></div>
+</div>
+<!-- Labels -->
+<p class="text-slate-400 text-[10px] text-center font-bold mt-2">0.0</p>
+<p class="text-slate-400 text-[10px] text-center font-bold mt-2">0.1</p>
+<p class="text-slate-400 text-[10px] text-center font-bold mt-2">0.2</p>
+<p class="text-slate-400 text-[10px] text-center font-bold mt-2">0.4</p>
+<p class="text-slate-400 text-[10px] text-center font-bold mt-2">0.6</p>
+<p class="text-slate-400 text-[10px] text-center font-bold mt-2">0.8</p>
+<p class="text-slate-400 text-[10px] text-center font-bold mt-2">0.9</p>
+<p class="text-slate-400 text-[10px] text-center font-bold mt-2">1.0</p>
+</div>
+<div class="flex justify-between items-center pt-2">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1.5">
+<div class="size-2 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+<span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Low Risk</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="size-2 rounded-full bg-primary"></div>
+<span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">High Risk</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Feature Importance Chart -->
+<div class="flex flex-col gap-6 rounded-xl border border-slate-200 dark:border-border-dark bg-white dark:bg-surface-dark p-6 shadow-sm">
+<div>
+<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight">Top Churn Factors</h3>
+<p class="text-slate-500 text-xs font-normal">SHAP value ranking of predictive features</p>
+</div>
+<div class="flex-1 flex flex-col justify-between gap-4 py-2">
+<div class="space-y-1">
+<div class="flex justify-between text-[11px] font-bold text-slate-400 uppercase tracking-tighter mb-1">
+<span>Watch Time</span>
+<span>0.42</span>
+</div>
+<div class="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 100%;"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[11px] font-bold text-slate-400 uppercase tracking-tighter mb-1">
+<span>Sub Age</span>
+<span>0.31</span>
+</div>
+<div class="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary/80" style="width: 75%;"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[11px] font-bold text-slate-400 uppercase tracking-tighter mb-1">
+<span>Devices</span>
+<span>0.28</span>
+</div>
+<div class="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary/60" style="width: 65%;"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[11px] font-bold text-slate-400 uppercase tracking-tighter mb-1">
+<span>Last Login</span>
+<span>0.19</span>
+</div>
+<div class="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary/40" style="width: 45%;"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[11px] font-bold text-slate-400 uppercase tracking-tighter mb-1">
+<span>Pay Fail</span>
+<span>0.14</span>
+</div>
+<div class="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary/20" style="width: 35%;"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Table Section -->
+<section class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark overflow-hidden shadow-sm">
+<div class="p-6 border-b border-slate-200 dark:border-border-dark flex flex-wrap justify-between items-center gap-4">
+<div>
+<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight">High-Risk Customers</h3>
+<p class="text-slate-500 text-xs font-normal">Immediate action recommended for these users</p>
+</div>
+<div class="flex items-center gap-2">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+<input class="bg-slate-100 dark:bg-background-dark border-none rounded-lg pl-10 pr-4 py-2 text-xs focus:ring-1 focus:ring-primary w-64 text-slate-900 dark:text-white" placeholder="Search User ID..." type="text"/>
+</div>
+<button class="bg-slate-100 dark:bg-background-dark p-2 rounded-lg text-slate-400 hover:text-white transition-colors border border-transparent hover:border-slate-700">
+<span class="material-symbols-outlined text-sm">filter_list</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-background-dark/50">
+<th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">User ID</th>
+<th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Plan</th>
+<th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Probability Score</th>
+<th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Last Activity</th>
+<th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tenure</th>
+<th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-border-dark">
+<tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
+<td class="px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">usr_942183</td>
+<td class="px-6 py-4 text-sm text-slate-500">Premium 4K</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-bold">
+                                            0.94 High
+                                        </span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">2 days ago</td>
+<td class="px-6 py-4 text-sm text-slate-500">14 months</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:text-white hover:bg-primary px-3 py-1.5 rounded-lg border border-primary text-xs font-bold transition-all">
+                                            Take Action
+                                        </button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+<td class="px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">usr_331092</td>
+<td class="px-6 py-4 text-sm text-slate-500">Standard</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-bold">
+                                            0.88 High
+                                        </span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">5 days ago</td>
+<td class="px-6 py-4 text-sm text-slate-500">3 months</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:text-white hover:bg-primary px-3 py-1.5 rounded-lg border border-primary text-xs font-bold transition-all">
+                                            Take Action
+                                        </button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+<td class="px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">usr_776104</td>
+<td class="px-6 py-4 text-sm text-slate-500">Basic Ads</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold">
+                                            0.71 Med
+                                        </span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">Yesterday</td>
+<td class="px-6 py-4 text-sm text-slate-500">8 months</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:text-white hover:bg-primary px-3 py-1.5 rounded-lg border border-primary text-xs font-bold transition-all">
+                                            Take Action
+                                        </button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+<td class="px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">usr_210554</td>
+<td class="px-6 py-4 text-sm text-slate-500">Premium 4K</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold">
+                                            0.68 Med
+                                        </span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">12 days ago</td>
+<td class="px-6 py-4 text-sm text-slate-500">24 months</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:text-white hover:bg-primary px-3 py-1.5 rounded-lg border border-primary text-xs font-bold transition-all">
+                                            Take Action
+                                        </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-6 py-4 border-t border-slate-200 dark:border-border-dark flex items-center justify-between">
+<p class="text-[10px] text-slate-500 font-medium">Showing 4 of 1,240 predicted churners</p>
+<div class="flex items-center gap-2">
+<button class="size-8 flex items-center justify-center rounded border border-slate-200 dark:border-border-dark text-slate-400">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="size-8 flex items-center justify-center rounded border border-primary bg-primary text-white text-[10px] font-bold">1</button>
+<button class="size-8 flex items-center justify-center rounded border border-slate-200 dark:border-border-dark text-slate-400 text-[10px] font-bold">2</button>
+<button class="size-8 flex items-center justify-center rounded border border-slate-200 dark:border-border-dark text-slate-400">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+</body></html>

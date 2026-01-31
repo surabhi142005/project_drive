@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Backend API Testing - RetainStream</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #050505;
+      color: #e0e0e0;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    
+    h1 {
+      color: #ea2a33;
+      margin-bottom: 30px;
+      font-size: 2.5em;
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+    
+    .card {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 25px;
+      transition: all 0.3s;
+    }
+    
+    .card:hover {
+      border-color: #ea2a33;
+      box-shadow: 0 0 20px rgba(234, 42, 51, 0.1);
+    }
+    
+    .card h2 {
+      color: #ea2a33;
+      margin-bottom: 15px;
+      font-size: 1.3em;
+    }
+    
+    .card p {
+      color: #888;
+      margin-bottom: 20px;
+      font-size: 0.9em;
+    }
+    
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #333;
+    }
+    
+    .metric:last-child {
+      border-bottom: none;
+    }
+    
+    .metric-label {
+      color: #888;
+    }
+    
+    .metric-value {
+      color: #ea2a33;
+      font-weight: bold;
+      font-size: 1.1em;
+    }
+    
+    .btn {
+      background: #ea2a33;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+      margin-right: 10px;
+      margin-top: 15px;
+    }
+    
+    .btn:hover {
+      background: #d91f29;
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background: #333;
+      color: #e0e0e0;
+    }
+    
+    .btn-secondary:hover {
+      background: #444;
+    }
+    
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 15px 0;
+      padding: 12px;
+      background: rgba(234, 42, 51, 0.1);
+      border-radius: 6px;
+      font-size: 0.9em;
+    }
+    
+    .status.error {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+    }
+    
+    .status.success {
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    
+    .code-block {
+      background: #0a0a0a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 15px 0;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85em;
+      color: #22c55e;
+    }
+    
+    .loading {
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 RetainStream Backend API Testing</h1>
+    
+    <div class="grid">
+      <!-- Health Check -->
+      <div class="card">
+        <h2>Health Check</h2>
+        <p>Check if API servers are running</p>
+        <div id="health-status"></div>
+        <button class="btn" onclick="checkHealth()">Check Health</button>
+      </div>
+      
+      <!-- Authentication -->
+      <div class="card">
+        <h2>Authentication</h2>
+        <p>User login to get JWT token</p>
+        <div id="auth-status"></div>
+        <button class="btn" onclick="loginUser()">Login</button>
+        <button class="btn btn-secondary" onclick="logoutUser()">Logout</button>
+      </div>
+      
+      <!-- Dashboard Metrics -->
+      <div class="card">
+        <h2>Dashboard Metrics</h2>
+        <p>Real-time KPI metrics</p>
+        <div id="metrics-status"></div>
+        <div id="metrics-data"></div>
+        <button class="btn" onclick="fetchMetrics()">Load Metrics</button>
+      </div>
+      
+      <!-- Churn Distribution -->
+      <div class="card">
+        <h2>Churn Distribution</h2>
+        <p>Probability score distribution</p>
+        <div id="distribution-status"></div>
+        <button class="btn" onclick="fetchDistribution()">Load Distribution</button>
+      </div>
+      
+      <!-- High-Risk Customers -->
+      <div class="card">
+        <h2>High-Risk Customers</h2>
+        <p>Customers at risk of churning</p>
+        <div id="customers-status"></div>
+        <div id="customers-data" style="max-height: 300px; overflow-y: auto;"></div>
+        <button class="btn" onclick="fetchHighRiskCustomers()">Load Customers</button>
+      </div>
+      
+      <!-- Model Performance -->
+      <div class="card">
+        <h2>Model Performance</h2>
+        <p>XGBoost v2.4.1 metrics</p>
+        <div id="performance-status"></div>
+        <div id="performance-data"></div>
+        <button class="btn" onclick="fetchPerformance()">Load Performance</button>
+      </div>
+      
+      <!-- Feature Importance -->
+      <div class="card">
+        <h2>Feature Importance</h2>
+        <p>SHAP values for churn factors</p>
+        <div id="features-status"></div>
+        <div id="features-data" style="max-height: 300px; overflow-y: auto;"></div>
+        <button class="btn" onclick="fetchFeatures()">Load Features</button>
+      </div>
+      
+      <!-- Predictions -->
+      <div class="card">
+        <h2>Generate Predictions</h2>
+        <p>Run ML model on customer batch</p>
+        <div id="predictions-status"></div>
+        <button class="btn" onclick="generatePredictions(100)">Generate (100)</button>
+        <button class="btn" onclick="generatePredictions(1000)">Generate (1000)</button>
+      </div>
+      
+      <!-- Model Info -->
+      <div class="card">
+        <h2>Model Info</h2>
+        <p>XGBoost model details</p>
+        <div id="model-status"></div>
+        <div id="model-data"></div>
+        <button class="btn" onclick="fetchModelStatus()">Load Model Info</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:5000/api';
+    let token = localStorage.getItem('retainstream_token');
+
+    async function apiCall(endpoint, method = 'GET', data = null) {
+      try {
+        const options = {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+          }
+        };
+        
+        if (data) options.body = JSON.stringify(data);
+        
+        const response = await fetch(`${API_BASE}${endpoint}`, options);
+        const result = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(result.message || `HTTP ${response.status}`);
+        }
+        
+        return result;
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    async function checkHealth() {
+      const el = document.getElementById('health-status');
+      el.innerHTML = '<div class="status"><span class="status-dot"></span>Checking...</div>';
+      
+      try {
+        const result = await apiCall('/health');
+        el.innerHTML = `
+          <div class="status success">
+            <span class="status-dot"></span>
+            API Server: OK
+          </div>
+          <div class="code-block">Service: ${result.service}<br/>Version: ${result.version}</div>
+        `;
+      } catch (error) {
+        el.innerHTML = `<div class="status error"><span class="status-dot"></span>Error: ${error.message}</div>`;
+      }
+    }
+
+    async function loginUser() {
+      const el = document.getElementById('auth-status');
+      el.innerHTML = '<div class="status"><span class="status-dot"></span>Logging in...</div>';
+      
+      try {
+        const result = await apiCall('/auth/login', 'POST', {
+          email: 'alex.chen@netflix.com',
+          password: 'password'
+        });
+        
+        token = result.data.token;
+        localStorage.setItem('retainstream_token', token);
+        
+        el.innerHTML = `
+          <div class="status success">
+            <span class="status-dot"></span>
+            Logged in as ${result.data.user.name}
+          </div>
+          <div class="code-block">Token: ${token.substring(0, 20)}...</div>
+        `;
+      } catch (error) {
+        el.innerHTML = `<div class="status error"><span class="status-dot"></span>Error: ${error.message}</div>`;
+      }
+    }
+
+    function logoutUser() {
+      token = null;
+      localStorage.removeItem('retainstream_token');
+      document.getElementById('auth-status').innerHTML = '<div class="status">Logged out</div>';
+    }
+
+    async function fetchMetrics() {
+      const el = document.getElementById('metrics-status');
+      const data = document.getElementById('metrics-data');
+      el.innerHTML = '<div class="status"><span class="status-dot"></span>Loading...</div>';
+      
+      try {
+        const result = await apiCall('/dashboard/metrics');
+        el.innerHTML = '<div class="status success"><span class="status-dot"></span>Loaded</div>';
+        
+        const m = result.data;
+        data.innerHTML = `
+          <div class="metric">
+            <span class="metric-label">Churn Rate</span>
+            <span class="metric-value">${m.churnRate.current}%</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Predicted Churners</span>
+            <span class="metric-value">${m.predictedChurners.count.toLocaleString()}</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Model AUC</span>
+            <span class="metric-value">${m.modelAuc.score}</span>
+          </div>
+        `;
+      } catch (error) {
+        el.innerHTML = `<div class="status error"><span class="status-dot"></span>Error: ${error.message}</div>`;
+      }
+    }
+
+    async function fetchDistribution() {
+      const el = document.getElementById('distribution-status');
+      el.innerHTML = '<div class="status"><span class="status-dot"></span>Loading...</div>';
+      
+      try {
+        const result = await apiCall('/dashboard/distribution');
+        el.innerHTML = '<div class="status success"><span class="status-dot"></span>Loaded</div>';
+        
+        let html = '<div style="font-size: 0.85em;">';
+        result.data.forEach(d => {
+          html += `<div class="metric"><span>${d.bucket.toFixed(1)}</span><span>${d.count.toLocaleString()}</span></div>`;
+        });
+        html += '</div>';
+        document.getElementById('distribution-status').innerHTML += html;
+      } catch (error) {
+        el.innerHTML = `<div class="status error"><span class="status-dot"></span>Error: ${error.message}</div>`;
+      }
+    }
+
+    async function fetchHighRiskCustomers() {
+      const el = document.getElementById('customers-status');
+      const data = document.getElementById('customers-data');
+      el.innerHTML = '<div class="status"><span class="status-dot"></span>Loading...</div>';
+      
+      try {
+        const result = await apiCall('/customers/high-risk');
+        el.innerHTML = '<div class="status success"><span class="status-dot"></span>Loaded</div>';
+        
+        let html = '<table style="width: 100%; font-size: 0.85em;"><tr style="border-bottom: 1px solid #333;"><th style="text-align: left; padding: 8px; color: #ea2a33;">User</th><th style="text-align: right; padding: 8px; color: #ea2a33;">Risk</th></tr>';
+        result.data.customers.forEach(c => {
+          html += `<tr style="border-bottom: 1px solid #333;"><td style="padding: 8px;">${c.user_id}</td><td style="text-align: right; padding: 8px; color: #ea2a33;">${(c.churn_probability * 100).toFixed(0)}%</td></tr>`;
+        });
+        html += '</table>';
+        data.innerHTML = html;
+      } catch (error) {
+        el.innerHTML = `<div class="status error"><span class="status-dot"></span>Error: ${error.message}</div>`;
+      }
+    }
+
+    async function fetchPerformance() {
+      const el = document.getElementById('performance-status');
+      const data = document.getElementById('performance-data');
+      el.innerHTML = '<div class="status"><span class="status-dot"></span>Loading...</div>';
+      
+      try {
+        const result = await apiCall('/predictions/performance');
+        el.innerHTML = '<div class="status success"><span class="status-dot"></span>Loaded</div>';
+        
+        const p = result.data;
+        data.innerHTML = `
+          <div class="metric">
+            <span class="metric-label">AUC</span>
+            <span class="metric-value">${p.auc.toFixed(3)}</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Precision</span>
+            <span class="metric-value">${p.precision.toFixed(3)}</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Recall</span>
+            <span class="metric-value">${p.recall.toFixed(3)}</span>
+          </div>
+        `;
+      } catch (error) {
+        el.innerHTML = `<div class="status error"><span class="status-dot"></span>Error: ${error.message}</div>`;
+      }
+    }
+
+    async function fetchFeatures() {
+      const el = document.getElementById('features-status');
+      const data = document.getElementById('features-data');
+      el.innerHTML = '<div class="status"><span class="status-dot"></span>Loading...</div>';
+      
+      try {
+        const result = await apiCall('/dashboard/features');
+        el.innerHTML = '<div class="status success"><span class="status-dot"></span>Loaded</div>';
+        
+        let html = '<div style="font-size: 0.85em;">';
+        result.data.forEach(f => {
+          html += `<div class="metric"><span>${f.name}</span><span>${f.value.toFixed(3)}</span></div>`;
+        });
+        html += '</div>';
+        data.innerHTML = html;
+      } catch (error) {
+        el.innerHTML = `<div class="status error"><span class="status-dot"></span>Error: ${error.message}</div>`;
+      }
+    }
+
+    async function generatePredictions(count) {
+      const el = document.getElementById('predictions-status');
+      el.innerHTML = '<div class="status"><span class="status-dot loading"></span>Generating...</div>';
+      
+      try {
+        const result = await apiCall('/dashboard/predict', 'POST', { sample_size: count });
+        el.innerHTML = `
+          <div class="status success">
+            <span class="status-dot"></span>
+            Generated ${result.data.predictions_generated || count} predictions
+          </div>
+          <div class="code-block">Avg Probability: ${(result.data.average_probability * 100).toFixed(1)}%</div>
+        `;
+      } catch (error) {
+        el.innerHTML = `<div class="status error"><span class="status-dot"></span>Error: ${error.message}</div>`;
+      }
+    }
+
+    async function fetchModelStatus() {
+      const el = document.getElementById('model-status');
+      const data = document.getElementById('model-data');
+      el.innerHTML = '<div class="status"><span class="status-dot"></span>Loading...</div>';
+      
+      try {
+        const result = await apiCall('/model/status');
+        el.innerHTML = '<div class="status success"><span class="status-dot"></span>Loaded</div>';
+        
+        const m = result.data;
+        data.innerHTML = `
+          <div class="metric">
+            <span class="metric-label">Version</span>
+            <span class="metric-value">${m.version}</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Algorithm</span>
+            <span class="metric-value">${m.algorithm}</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">AUC Score</span>
+            <span class="metric-value">${m.auc_score}</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Training Samples</span>
+            <span class="metric-value">${m.training_samples.toLocaleString()}</span>
+          </div>
+        `;
+      } catch (error) {
+        el.innerHTML = `<div class="status error"><span class="status-dot"></span>Error: ${error.message}</div>`;
+      }
+    }
+
+    // Auto-check health on load
+    window.addEventListener('load', checkHealth);
+  </script>
+</body>
+</html>
